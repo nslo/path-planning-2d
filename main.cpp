@@ -1,19 +1,18 @@
-#include <stdio.h>
-#include <assert.h>
-#include <math.h>
-#include <list>
-#include <iostream>
 #include <GL/gl.h>
 #include <GL/glut.h>
+#include <iostream>
+#include <cassert>
+#include <cmath>
+#include <list>
 
 #include "vector.hpp"
 
-#define EPSILON 0.01
-#define DELTA 0.0002
-#define PRM_POINTS 100
-#define SHOW_POINTS true
-#define K 4
-#define infinity 1000.0
+const float EPSILON = 0.01;
+const float DELTA = 0.0002;
+const int PRM_POINTS = 100;
+const bool SHOW_POINTS = true;
+const int K =  4;
+const float infinity = 1000.0;
 
 using namespace std;
 using namespace _462;
