@@ -2,7 +2,7 @@
 CXX = clang++
 CXXFLAGS = -Wall -Wextra -Werror -pedantic -std=c++11
 LDLIBS = -lglut -lGLU -lGL 
-#LDLIBS += -GLU -lXmu -lX11 -lXi
+#LDLIBS += -lXmu -lX11 -lXi
 #LDLIBS += -lboost_thread -lboost_system
 ISPC = ispc
 ISPCFLAGS = -O2 --target=avx-x2 --arch=x86-64
@@ -47,6 +47,3 @@ clean:
 fmt:
 	astyle --recursive --style=allman "*.cpp"
 	astyle --recursive --style=allman "*.hpp"
- 
-
-
