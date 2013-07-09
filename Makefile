@@ -22,7 +22,7 @@ ifeq ($(MODE),)
 	MODE = release
 endif
 ifeq ($(MODE), release)
-	CXXFLAGS += -O2
+	CXXFLAGS += -O3
 else ifeq ($(MODE), debug)
 	CXXFLAGS += -g -O0
 else
