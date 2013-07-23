@@ -8,7 +8,7 @@ ISPC = ispc
 ISPCFLAGS = -O2 --target=avx-x2 --arch=x86-64
 
 # code
-SRC = main.cpp
+SRC = main.cpp vector.cpp
 TARGET = path
 
 # directories
@@ -39,7 +39,7 @@ init:
 	@mkdir -p "$(OBJ_DIR)"
 
 $(OBJ_DIR)/%.o: %.cpp
-	$(CXX) $(INC_DIR) -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(INC_DIR) -c $< -o $@
 
 clean:
 	@rm -rf $(OBJ_DIR) $(TARGET)

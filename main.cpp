@@ -11,7 +11,7 @@ const float EPSILON = 0.01;
 const float DELTA = 0.0002;
 const int PRM_POINTS = 100;
 const bool SHOW_POINTS = true;
-const int K =  4;
+const int K = 4;
 const float infinity = 1000.0;
 
 using namespace std;
@@ -34,7 +34,7 @@ public:
 
     double dist(Point2D a);
     bool closeEnough(Point2D other);
-    bool inTriangle(Point2D* pts, int n);
+    bool inTriangle(Point2D* pts);
     bool inPoly(Point2D* pts, int n);
     float minDistLine(Point2D v, Point2D w);
 };
@@ -52,7 +52,7 @@ bool Point2D::closeEnough(Point2D a)
 }
 
 // true if this point is inside triangle described by a, b, and c
-bool Point2D::inTriangle(Point2D* pts, int n)
+bool Point2D::inTriangle(Point2D* pts)
 {
     // Compute barycentric coordinates (u, v, w) for
     // point p with respect to triangle (a, b, c)
@@ -181,7 +181,7 @@ bool Triangle::onDown(Point2D a)
     }
 
     // check to see if mouse is inside triangle
-    if (a.inTriangle(pts, numPoints))
+    if (a.inTriangle(pts))
     {
         dragPoint = -2;
 
@@ -678,7 +678,7 @@ void dijkstra(int source, int goal, Triangle* tri)
     int predecessor[PRM_POINTS];
     float distance[PRM_POINTS];
     bool mark[PRM_POINTS]; //keep track of visited node
-    float minDistance = infinity;
+    //float minDistance = infinity;
     int closestUnmarkedNode;
     int count = 0;
 
@@ -779,7 +779,7 @@ void prm()
 
         for (i = triangles.begin(); i != triangles.end(); ++i)
         {
-            if (tempPoint.inTriangle((*i)->pts, (*i)->numPoints))
+            if (tempPoint.inTriangle((*i)->pts))
             {
                 valid = false;
                 break;
@@ -1239,6 +1239,8 @@ void keyboard(unsigned char key, int x, int y)
     default:
         break;
     }
+
+    x = y; y = x; // suppress compiler warnings (x and y are mouse coords at time of keypress)
 
     glutPostRedisplay(); // tell GLUT to call display()
 }
