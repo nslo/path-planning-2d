@@ -14,9 +14,6 @@ const bool SHOW_POINTS = true;
 const int K = 4;
 const float infinity = 1000.0;
 
-using namespace std;
-using namespace _462;
-
 //---------------- 2D point class --------------------------------//
 
 class Point2D
@@ -61,9 +58,9 @@ bool Point2D::inTriangle(Point2D* pts)
     Point2D b = pts[1];
     Point2D c = pts[2];
 
-    Vector2 v0 = Vector2(b.x - a.x, b.y - a.y);
-    Vector2 v1 = Vector2(c.x - a.x, c.y - a.y);
-    Vector2 v2 = Vector2(x - a.x, y - a.y);
+    _462::Vector2 v0 = _462::Vector2(b.x - a.x, b.y - a.y);
+    _462::Vector2 v1 = _462::Vector2(c.x - a.x, c.y - a.y);
+    _462::Vector2 v2 = _462::Vector2(x - a.x, y - a.y);
     float d00 = dot(v0, v0);
     float d01 = dot(v0, v1);
     float d11 = dot(v1, v1);
@@ -114,8 +111,8 @@ public:
     Point2D lastMouse; // last mouse position (for dragging)
     float radius; // "radius" of triangle
     Point2D centroid; // "radius" of triangle
-    list<Point2D> path; // the list of points to follow to the path
-    Vector2 orientation;
+    std::list<Point2D> path; // the list of points to follow to the path
+    _462::Vector2 orientation;
 
     Triangle();
     void draw(); // draw the triangle
@@ -463,15 +460,15 @@ bool replan;
 Point2D randPoints[PRM_POINTS]; 
 float adjacency[PRM_POINTS][PRM_POINTS];
 
-typedef list<Triangle *> TriList;
+typedef std::list<Triangle *> TriList;
 TriList triangles; // the list of our triangles
 Triangle *activeTriangle = NULL; // the active triangle while dragging
 
-typedef list<Hexagon *> HexList;
+typedef std::list<Hexagon *> HexList;
 HexList hexagons; // the list of our hexagons
 Hexagon *activeHexagon = NULL; // the active hexagon while dragging
 
-typedef list<Quad *> QuadList;
+typedef std::list<Quad *> QuadList;
 QuadList quads; // the list of our hexagons
 Quad *activeQuad = NULL; // the active hexagon while dragging
 
@@ -652,11 +649,11 @@ void printPath(int source, int node, int* predecessor, Triangle* tri)
     if (node == source)
     {
         tri->path.push_back(randPoints[source]);
-        cout << (char)(node + 97) << "..";
+        std::cout << (char)(node + 97) << "..";
     }
     else if (predecessor[node] == -1)
     {
-        cout << "No path from “<<source<<” to "<< (char)(node + 97) << endl;
+        std::cout << "No path from “<<source<<” to "<< (char)(node + 97) << std::endl;
         clearPaths();
         return;
     }
@@ -664,7 +661,7 @@ void printPath(int source, int node, int* predecessor, Triangle* tri)
     {
         printPath(source, predecessor[node], predecessor, tri);
         tri->path.push_back(randPoints[node]);
-        cout << (char) (node + 97) << "..";
+        std::cout << (char) (node + 97) << "..";
     }
 
     replan = false;
@@ -726,7 +723,7 @@ void dijkstra(int source, int goal, Triangle* tri)
     }
 
     printPath(source, goal, predecessor, tri);
-    cout << "->" << distance[goal] << endl;
+    std::cout << "->" << distance[goal] << std::endl;
 }
 
 void prm()
@@ -956,7 +953,7 @@ void step()
             // check to see if orientation has been set yet
             if ((*i)->orientation.x == 0.0 && (*i)->orientation.y == 0.0)
             {
-                Vector2 o = Vector2(waypoint.x - c.x, waypoint.y - c.y);
+                _462::Vector2 o = _462::Vector2(waypoint.x - c.x, waypoint.y - c.y);
                 (*i)->orientation = normalize(o);
             }
 
@@ -971,7 +968,7 @@ void step()
                 if (!(*i)->path.empty())
                 {
                     waypoint = (*i)->path.front();
-                    Vector2 o = Vector2(waypoint.x - c.x, waypoint.y - c.y);
+                    _462::Vector2 o = _462::Vector2(waypoint.x - c.x, waypoint.y - c.y);
                     (*i)->orientation = normalize(o);
                 }
             }

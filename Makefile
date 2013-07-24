@@ -10,12 +10,12 @@ ISPCFLAGS = -O2 --target=avx-x2 --arch=x86-64
 # code
 SRC = main.cpp vector.cpp
 TARGET = path
+OBJ = ${SRC:%.cpp=$(OBJ_DIR)/%.o}
 
 # directories
 OBJ_DIR = bin
 LIB_DIR = -L/usr/lib
 INC_DIR = -I/usr/include
-OBJ = ${SRC:%.cpp=$(OBJ_DIR)/%.o}
 
 # default to release; other option is debug
 ifeq ($(MODE),)
