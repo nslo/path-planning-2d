@@ -14,7 +14,7 @@ LDLIBS = -lglut -lGLU -lGL
 # src and executable
 SRC_DIR = src
 #SRCS = $(wildcard **/*.cpp)
-TARGET = glfw_practice
+TARGET = path
 # .o files
 TOP_OBJ_DIR = bin
 OBJ_DIR = $(TOP_OBJ_DIR)/$(SUB_OBJ_DIR)
