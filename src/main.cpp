@@ -2,9 +2,8 @@
 #include <GL/glut.h>
 #include <iostream>
 #include <cassert>
-#include <cmath>
+#include <math.h>
 #include <list>
-
 #include "vector.hpp"
 
 const float EPSILON = 0.01;
@@ -13,9 +12,6 @@ const int PRM_POINTS = 100;
 const bool SHOW_POINTS = true;
 const int K = 4;
 const float infinity = 1000.0;
-
-using namespace std;
-using namespace _462;
 
 //---------------- 2D point class --------------------------------//
 
@@ -42,7 +38,7 @@ public:
 // distance between this point and a
 double Point2D::dist(Point2D a)
 {
-    return sqrt((a.x - x) * (a.x - x) + (a.y - y) * (a.y - y));
+    return std::sqrt((a.x - x) * (a.x - x) + (a.y - y) * (a.y - y));
 }
 
 // true if a is close enough to this point
@@ -61,9 +57,9 @@ bool Point2D::inTriangle(Point2D* pts)
     Point2D b = pts[1];
     Point2D c = pts[2];
 
-    Vector2 v0 = Vector2(b.x - a.x, b.y - a.y);
-    Vector2 v1 = Vector2(c.x - a.x, c.y - a.y);
-    Vector2 v2 = Vector2(x - a.x, y - a.y);
+    _462::Vector2 v0 = _462::Vector2(b.x - a.x, b.y - a.y);
+    _462::Vector2 v1 = _462::Vector2(c.x - a.x, c.y - a.y);
+    _462::Vector2 v2 = _462::Vector2(x - a.x, y - a.y);
     float d00 = dot(v0, v0);
     float d01 = dot(v0, v1);
     float d11 = dot(v1, v1);
@@ -114,8 +110,8 @@ public:
     Point2D lastMouse; // last mouse position (for dragging)
     float radius; // "radius" of triangle
     Point2D centroid; // "radius" of triangle
-    list<Point2D> path; // the list of points to follow to the path
-    Vector2 orientation;
+    std::list<Point2D> path; // the list of points to follow to the path
+    _462::Vector2 orientation;
 
     Triangle();
     void draw(); // draw the triangle
@@ -230,7 +226,7 @@ float Triangle::getRadius(Point2D s, Point2D t, Point2D u)
     float b = t.dist(u);
     float c = u.dist(s);
     float radius = 2 * a * b * c /
-                   sqrt((a + b + c) * (-a + b + c) * (a - b + c) * (a + b - c));
+                   std::sqrt((a + b + c) * (-a + b + c) * (a - b + c) * (a + b - c));
     return radius;
 }
 
@@ -463,17 +459,17 @@ bool replan;
 Point2D randPoints[PRM_POINTS]; 
 float adjacency[PRM_POINTS][PRM_POINTS];
 
-typedef list<Triangle *> TriList;
+typedef std::list<Triangle *> TriList;
 TriList triangles; // the list of our triangles
-Triangle *activeTriangle = NULL; // the active triangle while dragging
+Triangle *activeTriangle = nullptr; // the active triangle while dragging
 
-typedef list<Hexagon *> HexList;
+typedef std::list<Hexagon *> HexList;
 HexList hexagons; // the list of our hexagons
-Hexagon *activeHexagon = NULL; // the active hexagon while dragging
+Hexagon *activeHexagon = nullptr; // the active hexagon while dragging
 
-typedef list<Quad *> QuadList;
+typedef std::list<Quad *> QuadList;
 QuadList quads; // the list of our hexagons
-Quad *activeQuad = NULL; // the active hexagon while dragging
+Quad *activeQuad = nullptr; // the active hexagon while dragging
 
 
 void init()
@@ -586,13 +582,15 @@ void reshape(int w, int h)
 
 
 static bool IsOnSegment(double xi, double yi, double xj, double yj,
-        double xk, double yk) {
+        double xk, double yk)
+{
     return (xi <= xk || xj <= xk) && (xk <= xi || xk <= xj) &&
         (yi <= yk || yj <= yk) && (yk <= yi || yk <= yj);
 }
 
 static char ComputeDirection(double xi, double yi, double xj, double yj,
-        double xk, double yk) {
+        double xk, double yk)
+{
     double a = (xk - xi) * (yj - yi);
     double b = (xj - xi) * (yk - yi);
 
@@ -601,7 +599,8 @@ static char ComputeDirection(double xi, double yi, double xj, double yj,
 
 /** Do line segments (x1, y1)--(x2, y2) and (x3, y3)--(x4, y4) intersect? */
 bool lineSegInter(double x1, double y1, double x2, double y2,
-        double x3, double y3, double x4, double y4) {
+        double x3, double y3, double x4, double y4)
+{
     char d1 = ComputeDirection(x3, y3, x4, y4, x1, y1);
     char d2 = ComputeDirection(x3, y3, x4, y4, x2, y2);
     char d3 = ComputeDirection(x1, y1, x2, y2, x3, y3);
@@ -631,8 +630,6 @@ bool polygonInter(double x1, double y1, double x2, double y2, Point2D* pts, int 
     return false;
 }
 
-
-
 void clearPaths()
 {
     TriList::iterator tri;
@@ -645,18 +642,16 @@ void clearPaths()
     }
 }
 
-
-
 void printPath(int source, int node, int* predecessor, Triangle* tri)
 {
     if (node == source)
     {
         tri->path.push_back(randPoints[source]);
-        cout << (char)(node + 97) << "..";
+        std::cout << (char)(node + 97) << "..";
     }
     else if (predecessor[node] == -1)
     {
-        cout << "No path from “<<source<<” to "<< (char)(node + 97) << endl;
+        std::cout << "No path from “<<source<<” to "<< (char)(node + 97) << std::endl;
         clearPaths();
         return;
     }
@@ -664,7 +659,7 @@ void printPath(int source, int node, int* predecessor, Triangle* tri)
     {
         printPath(source, predecessor[node], predecessor, tri);
         tri->path.push_back(randPoints[node]);
-        cout << (char) (node + 97) << "..";
+        std::cout << (char) (node + 97) << "..";
     }
 
     replan = false;
@@ -697,7 +692,7 @@ void dijkstra(int source, int goal, Triangle* tri)
         // If the node is already marked as visited, then it search for another
         int minDistance = infinity;
 
-        for(int i = 0; i < PRM_POINTS; i++)
+        for (int i = 0; i < PRM_POINTS; i++)
         {
             if((!mark[i]) && (minDistance >= distance[i]))
             {
@@ -726,7 +721,7 @@ void dijkstra(int source, int goal, Triangle* tri)
     }
 
     printPath(source, goal, predecessor, tri);
-    cout << "->" << distance[goal] << endl;
+    std::cout << "->" << distance[goal] << std::endl;
 }
 
 void prm()
@@ -891,13 +886,13 @@ void prm()
     {
         for (int b = 0; b < PRM_POINTS; b++)
         {
-            cout << adjacency[a][b] << "  ";
+            std::cout << adjacency[a][b] << "  ";
         }
 
-        cout << endl;
+        std::cout << std::endl;
     }
 
-    cout << endl;
+    std::cout << std::endl;
     */
 
 
@@ -956,22 +951,22 @@ void step()
             // check to see if orientation has been set yet
             if ((*i)->orientation.x == 0.0 && (*i)->orientation.y == 0.0)
             {
-                Vector2 o = Vector2(waypoint.x - c.x, waypoint.y - c.y);
+                _462::Vector2 o = _462::Vector2(waypoint.x - c.x, waypoint.y - c.y);
                 (*i)->orientation = normalize(o);
             }
 
             // check to see if current destination is within EPSILON of
             // next coordinate in path queue; if so, pop
             // TODO turn
-            if (abs(c.y - waypoint.y) < EPSILON &&
-                    (abs(c.x - waypoint.x) < EPSILON))
+            if (std::abs(c.y - waypoint.y) < EPSILON &&
+                    (std::abs(c.x - waypoint.x) < EPSILON))
             {
                 (*i)->path.pop_front();
 
                 if (!(*i)->path.empty())
                 {
                     waypoint = (*i)->path.front();
-                    Vector2 o = Vector2(waypoint.x - c.x, waypoint.y - c.y);
+                    _462::Vector2 o = _462::Vector2(waypoint.x - c.x, waypoint.y - c.y);
                     (*i)->orientation = normalize(o);
                 }
             }
@@ -1130,9 +1125,9 @@ void mouse(int button, int state, int x, int y)
     TriList::iterator i;
     HexList::iterator j;
     QuadList::iterator k;
-    activeTriangle = NULL;
-    activeHexagon = NULL;
-    activeQuad = NULL;
+    activeTriangle = nullptr;
+    activeHexagon = nullptr;
+    activeQuad = nullptr;
 
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
     {
@@ -1171,19 +1166,19 @@ void drag(int x, int y)
     replan = true;
     clearPaths();
 
-    if (activeTriangle != NULL)
+    if (activeTriangle != nullptr)
     {
         // drag corner of active triangle with the mouse
         activeTriangle->onDrag(mouseToPoint(x, y));
         glutPostRedisplay(); // force re-display
     }
-    else if (activeHexagon != NULL)
+    else if (activeHexagon != nullptr)
     {
         // drag corner of active hexagon with the mouse
         activeHexagon->onDrag(mouseToPoint(x, y));
         glutPostRedisplay(); // force re-display
     }
-    else if (activeQuad != NULL)
+    else if (activeQuad != nullptr)
     {
         // drag corner of active hexagon with the mouse
         activeQuad->onDrag(mouseToPoint(x, y));
