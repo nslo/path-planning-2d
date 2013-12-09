@@ -1,6 +1,7 @@
 SRCS = \
 	main.cpp \
 	vector.cpp \
+	geometry.cpp \
 
 # compiler flags
 CXX = clang++
@@ -34,7 +35,7 @@ endif
 
 ifeq ($(MODE), release)
     SUB_OBJ_DIR = release
-    CXXFLAGS += -O3
+    CXXFLAGS += -O2
 else ifeq ($(MODE), debug)
     SUB_OBJ_DIR = debug
     CXXFLAGS += -g -O0

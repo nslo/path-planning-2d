@@ -7,13 +7,12 @@
 
 #pragma once
 
-#include "math.hpp"
 #include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <iostream>
 
-namespace _462 {
+namespace nslo {
 
 /*
 This file defines 3 different vector classes: 2D, 3D, and 4D.
@@ -65,7 +64,7 @@ public:
     /**
      * Components of this vector.
      */
-    real_t x, y;
+    double x, y;
 
     /**
      * Default constructor. Leaves values unitialized.
@@ -75,7 +74,7 @@ public:
     /**
      * Create a vector with the given values.
      */
-    Vector2( real_t x, real_t y )
+    Vector2( double x, double y )
         : x( x ), y( y ) {}
 
     // also uses default copy and assignment
@@ -100,23 +99,23 @@ public:
         return *this;
     }
 
-    Vector2 operator*( real_t s ) const {
+    Vector2 operator*( double s ) const {
         return Vector2( x * s, y * s );
     }
 
-    Vector2& operator*=( real_t s ) {
+    Vector2& operator*=( double s ) {
         x *= s;
         y *= s;
         return *this;
     }
 
-    Vector2 operator/( real_t s ) const {
-        real_t inv = 1.0 / s;
+    Vector2 operator/( double s ) const {
+        double inv = 1.0 / s;
         return Vector2( x * inv, y * inv );
     }
 
-    Vector2& operator/=( real_t s ) {
-        real_t inv = 1.0 / s;
+    Vector2& operator/=( double s ) {
+        double inv = 1.0 / s;
         x *= inv;
         y *= inv;
         return *this;
@@ -129,7 +128,7 @@ public:
     /**
      * @remark No bounds checking.
      */
-    const real_t& operator[]( size_t i ) const {
+    const double& operator[]( size_t i ) const {
         // assumes all members are in a contiguous block
         assert( i >= 0 && i < DIM );
         return ( &x )[i];
@@ -138,7 +137,7 @@ public:
     /**
      * @remark No bounds checking.
      */
-    real_t& operator[]( size_t i ) {
+    double& operator[]( size_t i ) {
         // assumes all members are in a contiguous block
         assert( i >= 0 && i < DIM );
         return ( &x )[i];
@@ -161,35 +160,35 @@ public:
 /**
  * Returns the dot product of two vectors
  */
-inline real_t dot( const Vector2& lhs, const Vector2& rhs ) {
+inline double dot( const Vector2& lhs, const Vector2& rhs ) {
     return lhs.x * rhs.x + lhs.y * rhs.y;
 }
 
 /**
  * Efficiency function: does not require square root operation.
  */
-inline real_t squared_length( const Vector2& v ) {
+inline double squared_length( const Vector2& v ) {
     return v.x * v.x + v.y * v.y;
 }
 
 /**
  * Returns the length of a vector.
  */
-inline real_t length( const Vector2& v ) {
+inline double length( const Vector2& v ) {
     return sqrt( squared_length( v ) );
 }
 
 /**
  * Calculate the positive distance between two vectors.
  */
-inline real_t distance( const Vector2& lhs, const Vector2& rhs ) {
+inline double distance( const Vector2& lhs, const Vector2& rhs ) {
     return length( lhs - rhs );
 }
 
 /**
  * Efficiency function: does not require square root operation.
  */
-inline real_t squared_distance( const Vector2& lhs, const Vector2& rhs ) {
+inline double squared_distance( const Vector2& lhs, const Vector2& rhs ) {
     return squared_length( lhs - rhs );
 }
 
@@ -228,7 +227,7 @@ inline Vector2 vmin( const Vector2& lhs, const Vector2& rhs ) {
     );
 }
 
-inline Vector2 operator*( real_t s, const Vector2& rhs ) {
+inline Vector2 operator*( double s, const Vector2& rhs ) {
     return rhs * s;
 }
 
@@ -277,7 +276,7 @@ public:
     /**
      * Components of this vector.
      */
-    real_t x, y, z;
+    double x, y, z;
 
     /**
      * Default constructor. Leaves values unitialized.
@@ -287,13 +286,13 @@ public:
     /**
      * Create a vector with the given values.
      */
-    Vector3( real_t x, real_t y, real_t z )
+    Vector3( double x, double y, double z )
         : x( x ), y( y ), z( z ) {}
 
     /**
      * Create a vector from a 2d vector.
      */
-    Vector3( const Vector2& v, real_t z )
+    Vector3( const Vector2& v, double z )
         : x( v.x ), y( v.y ), z( z ) { }
 
     /**
@@ -326,24 +325,24 @@ public:
         return *this;
     }
 
-    Vector3 operator*( real_t s ) const {
+    Vector3 operator*( double s ) const {
         return Vector3( x * s, y * s, z * s );
     }
 
-    Vector3& operator*=( real_t s ) {
+    Vector3& operator*=( double s ) {
         x *= s;
         y *= s;
         z *= s;
         return *this;
     }
 
-    Vector3 operator/( real_t s ) const {
-        real_t inv = 1.0 / s;
+    Vector3 operator/( double s ) const {
+        double inv = 1.0 / s;
         return Vector3( x * inv, y * inv, z * inv );
     }
 
-    Vector3& operator/=( real_t s ) {
-        real_t inv = 1.0 / s;
+    Vector3& operator/=( double s ) {
+        double inv = 1.0 / s;
         x *= inv;
         y *= inv;
         z *= inv;
@@ -357,7 +356,7 @@ public:
     /**
      * @remark No bounds checking.
      */
-    const real_t& operator[]( size_t i ) const {
+    const double& operator[]( size_t i ) const {
         // assumes all members are in a contiguous block
         assert( i >= 0 && i < DIM );
         return ( &x )[i];
@@ -366,7 +365,7 @@ public:
     /**
      * @remark No bounds checking.
      */
-    real_t& operator[]( size_t i ) {
+    double& operator[]( size_t i ) {
         // assumes all members are in a contiguous block
         assert( i >= 0 && i < DIM );
         return ( &x )[i];
@@ -390,7 +389,7 @@ public:
 /**
  * Returns the dot product of two vectors
  */
-inline real_t dot( const Vector3& lhs, const Vector3& rhs ) {
+inline double dot( const Vector3& lhs, const Vector3& rhs ) {
     return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z;
 }
 
@@ -408,28 +407,28 @@ inline Vector3 cross( const Vector3& lhs, const Vector3& rhs ) {
 /**
  * Efficiency function: does not require square root operation.
  */
-inline real_t squared_length( const Vector3& v ) {
+inline double squared_length( const Vector3& v ) {
     return v.x * v.x + v.y * v.y + v.z * v.z;
 }
 
 /**
  * Returns the length of a vector.
  */
-inline real_t length( const Vector3& v ) {
+inline double length( const Vector3& v ) {
     return sqrt( squared_length( v ) );
 }
 
 /**
  * Calculate the positive distance between two vectors.
  */
-inline real_t distance( const Vector3& lhs, const Vector3& rhs ) {
+inline double distance( const Vector3& lhs, const Vector3& rhs ) {
     return length( lhs - rhs );
 }
 
 /**
  * Efficiency function: does not require square root operation.
  */
-inline real_t squared_distance( const Vector3& lhs, const Vector3& rhs ) {
+inline double squared_distance( const Vector3& lhs, const Vector3& rhs ) {
     return squared_length( lhs - rhs );
 }
 
@@ -470,7 +469,7 @@ inline Vector3 vmin( const Vector3& lhs, const Vector3& rhs ) {
     );
 }
 
-inline Vector3 operator*( real_t s, const Vector3& rhs ) {
+inline Vector3 operator*( double s, const Vector3& rhs ) {
     return rhs * s;
 }
 
@@ -524,7 +523,7 @@ public:
     /**
      * Components of this vector.
      */
-    real_t x, y, z, w;
+    double x, y, z, w;
 
     /**
      * Default constructor. Leaves values unitialized.
@@ -534,13 +533,13 @@ public:
     /**
      * Create a vector with the given values.
      */
-    Vector4( real_t x, real_t y, real_t z, real_t w )
+    Vector4( double x, double y, double z, double w )
         : x( x ), y( y ), z( z ), w( w ) {}
 
     /**
      * Create the vector (v.x, v.y, v.z, w).
      */
-    Vector4( const Vector3& v, real_t w )
+    Vector4( const Vector3& v, double w )
         : x( v.x ), y( v.y ), z( v.z ), w( w ) {}
 
     // also uses default copy and assignment
@@ -569,11 +568,11 @@ public:
         return *this;
     }
 
-    Vector4 operator*( real_t s ) const {
+    Vector4 operator*( double s ) const {
         return Vector4( x * s, y * s, z * s, w * s );
     }
 
-    Vector4& operator*=( real_t s ) {
+    Vector4& operator*=( double s ) {
         x *= s;
         y *= s;
         z *= s;
@@ -581,13 +580,13 @@ public:
         return *this;
     }
 
-    Vector4 operator/( real_t s ) const {
-        real_t inv = 1.0 / s;
+    Vector4 operator/( double s ) const {
+        double inv = 1.0 / s;
         return Vector4( x * inv, y * inv, z * inv, w * inv );
     }
 
-    Vector4& operator/=( real_t s ) {
-        real_t inv = 1.0 / s;
+    Vector4& operator/=( double s ) {
+        double inv = 1.0 / s;
         x *= inv;
         y *= inv;
         z *= inv;
@@ -602,7 +601,7 @@ public:
     /**
      * @remark No bounds checking.
      */
-    const real_t& operator[]( size_t i ) const {
+    const double& operator[]( size_t i ) const {
         // assumes all members are in a contiguous block
         assert( i >= 0 && i < DIM );
         return ( &x )[i];
@@ -611,7 +610,7 @@ public:
     /**
      * @remark No bounds checking.
      */
-    real_t& operator[]( size_t i ) {
+    double& operator[]( size_t i ) {
         // assumes all members are in a contiguous block
         assert( i >= 0 && i < DIM );
         return ( &x )[i];
@@ -645,42 +644,42 @@ public:
  * @remark If w==0, returns (x,y,z).
  */
 inline Vector3 project( const Vector4& v ) {
-    real_t winv = v.w == 0.0 ? 1.0 : 1.0 / v.w;
+    double winv = v.w == 0.0 ? 1.0 : 1.0 / v.w;
     return Vector3( v.x * winv, v.y * winv, v.z * winv );
 }
 
 /**
  * Returns the dot product of two vectors
  */
-inline real_t dot( const Vector4& lhs, const Vector4& rhs ) {
+inline double dot( const Vector4& lhs, const Vector4& rhs ) {
     return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z + lhs.w * rhs.w;
 }
 
 /**
  * Efficiency function: does not require square root operation.
  */
-inline real_t squared_length( const Vector4& v ) {
+inline double squared_length( const Vector4& v ) {
     return v.x * v.x + v.y * v.y + v.z * v.z + v.w * v.w;
 }
 
 /**
  * Returns the length of a vector.
  */
-inline real_t length( const Vector4& v ) {
+inline double length( const Vector4& v ) {
     return sqrt( squared_length( v ) );
 }
 
 /**
  * Calculate the positive distance between two vectors.
  */
-inline real_t distance( const Vector4& lhs, const Vector4& rhs ) {
+inline double distance( const Vector4& lhs, const Vector4& rhs ) {
     return length( lhs - rhs );
 }
 
 /**
  * Efficiency function: does not require square root operation.
  */
-inline real_t squared_distance( const Vector4& lhs, const Vector4& rhs ) {
+inline double squared_distance( const Vector4& lhs, const Vector4& rhs ) {
     return squared_length( lhs - rhs );
 }
 
@@ -723,7 +722,7 @@ inline Vector4 vmin( const Vector4& lhs, const Vector4& rhs ) {
     );
 }
 
-inline Vector4 operator*( real_t s, const Vector4& rhs ) {
+inline Vector4 operator*( double s, const Vector4& rhs ) {
     return rhs * s;
 }
 

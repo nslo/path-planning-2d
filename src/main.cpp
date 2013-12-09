@@ -2,11 +2,12 @@
 #include <GL/glut.h>
 #include <iostream>
 #include <cassert>
-#include <math.h>
 #include <list>
-#include "vector.hpp"
+#include "geometry.hpp"
 
 #define UNUSED(expr) do { (void)(expr); } while (0)
+
+using namespace nslo;
 
 const float EPSILON = 0.01;
 const float DELTA = 0.0002;
@@ -15,122 +16,34 @@ const bool SHOW_POINTS = true;
 const int K = 4;
 const float infinity = 1000.0;
 
-//---------------- 2D point class --------------------------------//
-
-class Point2D
-{
-public:
-    float x,y;
-
-    Point2D()
-    {
-        x = 0.0;
-        y = 0.0;
-    }
-
-    Point2D(float _x, float _y) : x(_x), y(_y) {}
-
-    double dist(Point2D a);
-    bool closeEnough(Point2D other);
-    bool inTriangle(Point2D* pts);
-    bool inPoly(Point2D* pts, int n);
-    float minDistLine(Point2D v, Point2D w);
-};
-
-// distance between this point and a
-double Point2D::dist(Point2D a)
-{
-    return std::sqrt((a.x - x) * (a.x - x) + (a.y - y) * (a.y - y));
-}
-
-// true if a is close enough to this point
-bool Point2D::closeEnough(Point2D a)
-{
-    return (dist(a) < EPSILON);
-}
-
-// true if this point is inside triangle described by a, b, and c
-bool Point2D::inTriangle(Point2D* pts)
-{
-    // Compute barycentric coordinates (u, v, w) for
-    // point p with respect to triangle (a, b, c)
-    float u, v, w;
-    Point2D a = pts[0];
-    Point2D b = pts[1];
-    Point2D c = pts[2];
-
-    _462::Vector2 v0 = _462::Vector2(b.x - a.x, b.y - a.y);
-    _462::Vector2 v1 = _462::Vector2(c.x - a.x, c.y - a.y);
-    _462::Vector2 v2 = _462::Vector2(x - a.x, y - a.y);
-    float d00 = dot(v0, v0);
-    float d01 = dot(v0, v1);
-    float d11 = dot(v1, v1);
-    float d20 = dot(v2, v0);
-    float d21 = dot(v2, v1);
-    float denom = d00 * d11 - d01 * d01;
-    v = (d11 * d20 - d01 * d21) / denom;
-    w = (d00 * d21 - d01 * d20) / denom;
-    u = 1.0f - v - w;
-    bool u_ok = u >= 0.0 && u <= 1.0;
-    bool v_ok = v >= 0.0 && v <= 1.0;
-    bool w_ok = w >= 0.0 && w <= 1.0;
-
-    if (u_ok && v_ok && w_ok)
-    {
-        return true;
-    }
-
-    return false;
-}
-
-// see if point is inside a polygon; cribbed from stackoverflow
-bool Point2D::inPoly(Point2D* pts, int n)
-{
-    int i, j, c = 0;
-
-    for (i = 0, j = n - 1; i < n; j = i++)
-    {
-        if (((pts[i].y > y) != (pts[j].y > y)) &&
-                (x < (pts[j].x - pts[i].x) * (y - pts[i].y) /
-                 (pts[j].y - pts[i].y) + pts[i].x))
-        {
-            c = !c;
-        }
-    }
-
-    return c;
-}
-
-//------------------ interactive triangle class ------------------//
-
 class Triangle
 {
 public:
     int numPoints;
-    Point2D pts[3]; // the points defining the triangle
+    Vector2 pts[3]; // the points defining the triangle
     int dragPoint; // current drag corner if any (-1 if none, -2 for move all)
-    Point2D lastMouse; // last mouse position (for dragging)
+    Vector2 lastMouse; // last mouse position (for dragging)
     float radius; // "radius" of triangle
-    Point2D centroid; // "radius" of triangle
-    std::list<Point2D> path; // the list of points to follow to the path
-    _462::Vector2 orientation;
+    Vector2 centroid; // "radius" of triangle
+    std::list<Vector2> path; // the list of points to follow to the path
+    Vector2 orientation;
 
     Triangle();
     void draw(); // draw the triangle
-    bool onDown(Point2D p); // call on mouse-down
-    void onDrag(Point2D p); // call on mouse drag to move the corner
+    bool onDown(Vector2 p); // call on mouse-down
+    void onDrag(Vector2 p); // call on mouse drag to move the corner
     void move(float dx, float dy);
-    float getRadius(Point2D s, Point2D t, Point2D u);
-    Point2D getCentroid(Point2D s, Point2D t, Point2D u);
+    float getRadius(Vector2 s, Vector2 t, Vector2 u);
+    Vector2 getCentroid(Vector2 s, Vector2 t, Vector2 u);
 };
 
 Triangle::Triangle()
 {
     // init default triangle
     numPoints = 3;
-    pts[0] = Point2D(0.49, 0.05);
-    pts[1] = Point2D(0.51, 0.05);
-    pts[2] = Point2D(0.50, 0.07);
+    pts[0] = Vector2(0.49, 0.05);
+    pts[1] = Vector2(0.51, 0.05);
+    pts[2] = Vector2(0.50, 0.07);
     dragPoint = -1;
     radius = getRadius(pts[0], pts[1], pts[2]);
     centroid = getCentroid(pts[0], pts[1], pts[2]);
@@ -163,14 +76,14 @@ void Triangle::draw()
     glEnd();
 }
 
-bool Triangle::onDown(Point2D a)
+bool Triangle::onDown(Vector2 p)
 {
-    lastMouse = a;
+    lastMouse = p;
 
     // check to see if mouse is on a corner; set dragPoint if so
     for (int i = 0; i < numPoints; ++i)
     {
-        if (a.closeEnough(pts[i]))
+        if (close_enough(p, pts[i]))
         {
             dragPoint = i;
 
@@ -179,7 +92,7 @@ bool Triangle::onDown(Point2D a)
     }
 
     // check to see if mouse is inside triangle
-    if (a.inTriangle(pts))
+    if (point_in_triangle(p, pts))
     {
         dragPoint = -2;
 
@@ -190,23 +103,23 @@ bool Triangle::onDown(Point2D a)
 }
 
 // move the dragPoint corner along with the mouse
-void Triangle::onDrag(Point2D a)
+void Triangle::onDrag(Vector2 p)
 {
     if (dragPoint > -1)
     {
-        pts[dragPoint] = a;
+        pts[dragPoint] = p;
     }
 
     if (dragPoint == -2)
     {
         for (int i = 0; i < numPoints; ++i)
         {
-            pts[i].x += (a.x - lastMouse.x);
-            pts[i].y += (a.y - lastMouse.y);
+            pts[i].x += (p.x - lastMouse.x);
+            pts[i].y += (p.y - lastMouse.y);
         }
     }
 
-    lastMouse = a;
+    lastMouse = p;
     radius = getRadius(pts[0], pts[1], pts[2]);
     centroid = getCentroid(pts[0], pts[1], pts[2]);
 }
@@ -222,21 +135,21 @@ void Triangle::move(float dx, float dy)
     centroid = getCentroid(pts[0], pts[1], pts[2]);
 }
 
-float Triangle::getRadius(Point2D s, Point2D t, Point2D u)
+float Triangle::getRadius(Vector2 s, Vector2 t, Vector2 u)
 {
-    float a = s.dist(t);
-    float b = t.dist(u);
-    float c = u.dist(s);
+    float a = distance(s, t);
+    float b = distance(t, u);
+    float c = distance(u, s);
     float radius = 2 * a * b * c /
                    std::sqrt((a + b + c) * (-a + b + c) * (a - b + c) * (a + b - c));
     return radius;
 }
 
-Point2D Triangle::getCentroid(Point2D s, Point2D t, Point2D u)
+Vector2 Triangle::getCentroid(Vector2 s, Vector2 t, Vector2 u)
 {
     float cx = (s.x + t.x + u.x) / 3.0;
     float cy = (s.y + t.y + u.y) / 3.0;
-    Point2D centroid = Point2D(cx, cy);
+    Vector2 centroid = Vector2(cx, cy);
     return centroid;
 }
 
@@ -246,26 +159,26 @@ class Hexagon
 {
 public:
     int numPoints;
-    Point2D pts[6]; // the points defining the polygon
+    Vector2 pts[6]; // the points defining the polygon
     int dragPoint; // current drag corner if any (-1 if none, -2 for move all)
-    Point2D lastMouse; // last mouse position (for dragging)
+    Vector2 lastMouse; // last mouse position (for dragging)
 
     Hexagon();
     void draw(); // draw the polygon
-    bool onDown(Point2D p); // call on mouse-down
-    void onDrag(Point2D p); // call on mouse drag to move the corner
+    bool onDown(Vector2 p); // call on mouse-down
+    void onDrag(Vector2 p); // call on mouse drag to move the corner
 };
 
 Hexagon::Hexagon()
 {
     // init default hexagon
     numPoints = 6;
-    pts[0] = Point2D(0.40, 0.10);
-    pts[1] = Point2D(0.20, 0.20);
-    pts[2] = Point2D(0.30, 0.20);
-    pts[3] = Point2D(0.50, 0.30);
-    pts[4] = Point2D(0.60, 0.30);
-    pts[5] = Point2D(0.55, 0.12);
+    pts[0] = Vector2(0.40, 0.10);
+    pts[1] = Vector2(0.20, 0.20);
+    pts[2] = Vector2(0.30, 0.20);
+    pts[3] = Vector2(0.50, 0.30);
+    pts[4] = Vector2(0.60, 0.30);
+    pts[5] = Vector2(0.55, 0.12);
     dragPoint = -1;
 }
 
@@ -294,14 +207,14 @@ void Hexagon::draw()
     glEnd();
 }
 
-bool Hexagon::onDown(Point2D a)
+bool Hexagon::onDown(Vector2 p)
 {
-    lastMouse = a;
+    lastMouse = p;
 
     // check to see if mouse is on a corner; set dragPoint if so
     for (int i = 0; i < numPoints; ++i)
     {
-        if (a.closeEnough(pts[i]))
+        if (close_enough(p, pts[i]))
         {
             dragPoint = i;
 
@@ -310,7 +223,7 @@ bool Hexagon::onDown(Point2D a)
     }
 
     // check to see if mouse is inside 
-    if (a.inPoly(pts, numPoints))
+    if (point_in_polygon(p, pts, numPoints))
     {
         dragPoint = -2;
 
@@ -321,7 +234,7 @@ bool Hexagon::onDown(Point2D a)
 }
 
 // move the dragPoint corner along with the mouse
-void Hexagon::onDrag(Point2D a)
+void Hexagon::onDrag(Vector2 a)
 {
     if (dragPoint > -1)
     {
@@ -346,26 +259,26 @@ class Quad
 {
 public:
     int numPoints;
-    Point2D pts[4]; // the points defining the quadrilateral
+    Vector2 pts[4]; // the points defining the quadrilateral
     int dragPoint; // current drag corner if any (-1 if none, -2 for move all)
-    Point2D lastMouse; // last mouse position (for dragging)
-    Point2D centroid;
+    Vector2 lastMouse; // last mouse position (for dragging)
+    Vector2 centroid;
 
     Quad();
     void draw(); // draw the polygon
-    bool onDown(Point2D p); // call on mouse-down
-    void onDrag(Point2D p); // call on mouse drag to move the corner
-    Point2D getCentroid(Point2D* pts, int n);
+    bool onDown(Vector2 p); // call on mouse-down
+    void onDrag(Vector2 p); // call on mouse drag to move the corner
+    Vector2 getCentroid(Vector2* pts, int n);
 };
 
 Quad::Quad()
 {
     // init default
     numPoints = 4;
-    pts[0] = Point2D(0.49, 0.86);
-    pts[1] = Point2D(0.51, 0.86);
-    pts[2] = Point2D(0.51, 0.89);
-    pts[3] = Point2D(0.49, 0.89);
+    pts[0] = Vector2(0.49, 0.86);
+    pts[1] = Vector2(0.51, 0.86);
+    pts[2] = Vector2(0.51, 0.89);
+    pts[3] = Vector2(0.49, 0.89);
     dragPoint = -1;
     centroid = getCentroid(pts, numPoints);
 }
@@ -384,14 +297,14 @@ void Quad::draw()
     glEnd();
 }
 
-bool Quad::onDown(Point2D a)
+bool Quad::onDown(Vector2 p)
 {
-    lastMouse = a;
+    lastMouse = p;
 
     // check to see if mouse is on a corner; set dragPoint if so
     for (int i = 0; i < numPoints; ++i)
     {
-        if (a.closeEnough(pts[i]))
+        if (close_enough(p, pts[i]))
         {
             dragPoint = i;
 
@@ -400,7 +313,7 @@ bool Quad::onDown(Point2D a)
     }
 
     // check to see if mouse is inside
-    if (a.inPoly(pts, numPoints))
+    if (point_in_polygon(p, pts, numPoints))
     {
         dragPoint = -2;
 
@@ -411,7 +324,7 @@ bool Quad::onDown(Point2D a)
 }
 
 // move the dragPoint corner along with the mouse
-void Quad::onDrag(Point2D a)
+void Quad::onDrag(Vector2 a)
 {
     if (dragPoint > -1)
     {
@@ -432,7 +345,7 @@ void Quad::onDrag(Point2D a)
 }
 
 
-Point2D Quad::getCentroid(Point2D* pts, int n)
+Vector2 Quad::getCentroid(Vector2* pts, int n)
 {
     float cx = 0.0, cy = 0.0;
 
@@ -444,7 +357,7 @@ Point2D Quad::getCentroid(Point2D* pts, int n)
 
     cx /= n;
     cy /= n;
-    Point2D centroid = Point2D(cx, cy);
+    Vector2 centroid = Vector2(cx, cy);
 
     return centroid;
 }
@@ -458,7 +371,7 @@ Point2D Quad::getCentroid(Point2D* pts, int n)
 int windowWidth, windowHeight; // dimensions of the window in pixel
 bool paused;
 bool replan;
-Point2D randPoints[PRM_POINTS]; 
+Vector2 randPoints[PRM_POINTS]; 
 float adjacency[PRM_POINTS][PRM_POINTS];
 
 typedef std::list<Triangle *> TriList;
@@ -484,7 +397,7 @@ void init()
 
     for (int i = 0; i < PRM_POINTS; i++)
     {
-        randPoints[i] = Point2D(0.0, 0.0);
+        randPoints[i] = Vector2(0.0, 0.0);
     }
 
     for (int i = 0; i < PRM_POINTS; i++)
@@ -582,55 +495,6 @@ void reshape(int w, int h)
     gluOrtho2D(0.0, 1.0, 0.0, 1.0);
 }
 
-
-static bool IsOnSegment(double xi, double yi, double xj, double yj,
-        double xk, double yk)
-{
-    return (xi <= xk || xj <= xk) && (xk <= xi || xk <= xj) &&
-        (yi <= yk || yj <= yk) && (yk <= yi || yk <= yj);
-}
-
-static char ComputeDirection(double xi, double yi, double xj, double yj,
-        double xk, double yk)
-{
-    double a = (xk - xi) * (yj - yi);
-    double b = (xj - xi) * (yk - yi);
-
-    return a < b ? -1 : a > b ? 1 : 0;
-}
-
-/** Do line segments (x1, y1)--(x2, y2) and (x3, y3)--(x4, y4) intersect? */
-bool lineSegInter(double x1, double y1, double x2, double y2,
-        double x3, double y3, double x4, double y4)
-{
-    char d1 = ComputeDirection(x3, y3, x4, y4, x1, y1);
-    char d2 = ComputeDirection(x3, y3, x4, y4, x2, y2);
-    char d3 = ComputeDirection(x1, y1, x2, y2, x3, y3);
-    char d4 = ComputeDirection(x1, y1, x2, y2, x4, y4);
-
-    return (((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0)) &&
-            ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0))) ||
-        (d1 == 0 && IsOnSegment(x3, y3, x4, y4, x1, y1)) ||
-        (d2 == 0 && IsOnSegment(x3, y3, x4, y4, x2, y2)) ||
-        (d3 == 0 && IsOnSegment(x1, y1, x2, y2, x3, y3)) ||
-        (d4 == 0 && IsOnSegment(x1, y1, x2, y2, x4, y4));
-}
-
-bool polygonInter(double x1, double y1, double x2, double y2, Point2D* pts, int n)
-{
-    for (int i = 0; i < n; i++)
-    {
-        Point2D a = pts[i];
-        Point2D b = pts[(i + 1) % n];
-
-        if (lineSegInter(x1, y1, x2, y2, a.x, a.y, b.x, b.y))
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
 
 void clearPaths()
 {
@@ -736,7 +600,7 @@ void prm()
         bool valid = true;
         float x = (float) rand() / (RAND_MAX);
         float y = (float) rand() / (RAND_MAX);
-        Point2D tempPoint = Point2D(x, y);
+        Vector2 tempPoint = Vector2(x, y);
         TriList::iterator i;
         HexList::iterator j;
         QuadList::iterator k;
@@ -748,7 +612,7 @@ void prm()
 
         for (j = hexagons.begin(); j != hexagons.end(); ++j)
         {
-            if (tempPoint.inPoly((*j)->pts, (*j)->numPoints))
+            if (point_in_polygon(tempPoint, (*j)->pts, (*j)->numPoints))
             {
                 valid = false;
                 break;
@@ -762,7 +626,7 @@ void prm()
 
         for (k = quads.begin(); k != quads.end(); ++k)
         {
-            if (tempPoint.inPoly((*k)->pts, (*k)->numPoints))
+            if (point_in_polygon(tempPoint, (*k)->pts, (*k)->numPoints))
             {
                 valid = false;
                 break;
@@ -776,7 +640,7 @@ void prm()
 
         for (i = triangles.begin(); i != triangles.end(); ++i)
         {
-            if (tempPoint.inTriangle((*i)->pts))
+            if (point_in_triangle(tempPoint, (*i)->pts))
             {
                 valid = false;
                 break;
@@ -813,8 +677,6 @@ void prm()
         //int nearest[K];
 
         bool valid = true;
-        float x1 = randPoints[iter1].x;
-        float y1 = randPoints[iter1].y;
 
         //for (int iter2 = iter1 + 1; iter2 < PRM_POINTS; iter2++)
         for (int iter2 = iter1 + 1; iter2 < PRM_POINTS; iter2++)
@@ -822,12 +684,11 @@ void prm()
             TriList::iterator i;
             HexList::iterator j;
             QuadList::iterator k;
-            float x2 = randPoints[iter2].x;
-            float y2 = randPoints[iter2].y;
 
             for (j = hexagons.begin(); j != hexagons.end(); ++j)
             {
-                bool intersect = polygonInter(x1, y1, x2, y2, (*j)->pts, (*j)->numPoints);
+                bool intersect = edge_polygon_intersection(randPoints[iter1],
+                        randPoints[iter2], (*j)->pts, (*j)->numPoints);
 
                 if (intersect)
                 {
@@ -845,7 +706,8 @@ void prm()
 
             for (k = quads.begin(); k != quads.end(); ++k)
             {
-                bool intersect = polygonInter(x1, y1, x2, y2, (*k)->pts, (*k)->numPoints);
+                bool intersect = edge_polygon_intersection(randPoints[iter1], 
+                        randPoints[iter2], (*k)->pts, (*k)->numPoints);
 
                 if (intersect)
                 {
@@ -862,7 +724,8 @@ void prm()
 
             for (i = triangles.begin(); i != triangles.end(); ++i)
             {
-                bool intersect = polygonInter(x1, y1, x2, y2, (*i)->pts, (*i)->numPoints);
+                bool intersect = edge_polygon_intersection(randPoints[iter1],
+                        randPoints[iter2], (*i)->pts, (*i)->numPoints);
 
                 if (intersect)
                 {
@@ -877,7 +740,7 @@ void prm()
                 break;
             }
 
-            float edgeDist = randPoints[iter1].dist(randPoints[iter2]);
+            float edgeDist = distance(randPoints[iter1], randPoints[iter2]);
             adjacency[iter1][iter2] = edgeDist;
             adjacency[iter2][iter1] = edgeDist;
         }
@@ -922,13 +785,12 @@ void step()
             // - consider
             bool goalBlocked = false;
             HexList::iterator h;
-            Point2D tPos = (*i)->centroid;
-            Point2D gPos = quads.front()->centroid;
+            Vector2 tPos = (*i)->centroid;
+            Vector2 gPos = quads.front()->centroid;
 
             for (h = hexagons.begin(); h != hexagons.end(); ++h)
             {
-                goalBlocked |= polygonInter(tPos.x, tPos.y,
-                        gPos.x, gPos.y,
+                goalBlocked |= edge_polygon_intersection(tPos, gPos,
                         (*h)->pts, (*h)->numPoints);
             }
 
@@ -937,7 +799,7 @@ void step()
                 (*i)->path.clear();
                 (*i)->orientation.x = 0.0;
                 (*i)->orientation.y = 0.0;
-                Point2D q = quads.front()->centroid;
+                Vector2 q = quads.front()->centroid;
                 (*i)->path.push_back(q);
             }
 
@@ -947,13 +809,13 @@ void step()
 
 
 
-            Point2D waypoint = (*i)->path.front();
-            Point2D c = (*i)->centroid;
+            Vector2 waypoint = (*i)->path.front();
+            Vector2 c = (*i)->centroid;
 
             // check to see if orientation has been set yet
             if ((*i)->orientation.x == 0.0 && (*i)->orientation.y == 0.0)
             {
-                _462::Vector2 o = _462::Vector2(waypoint.x - c.x, waypoint.y - c.y);
+                Vector2 o = Vector2(waypoint.x - c.x, waypoint.y - c.y);
                 (*i)->orientation = normalize(o);
             }
 
@@ -968,7 +830,7 @@ void step()
                 if (!(*i)->path.empty())
                 {
                     waypoint = (*i)->path.front();
-                    _462::Vector2 o = _462::Vector2(waypoint.x - c.x, waypoint.y - c.y);
+                    Vector2 o = Vector2(waypoint.x - c.x, waypoint.y - c.y);
                     (*i)->orientation = normalize(o);
                 }
             }
@@ -1014,8 +876,8 @@ void idle()
                     break;
                 }
 
-                Point2D tPos = (*tri)->centroid;
-                Point2D gPos = quads.front()->centroid;
+                Vector2 tPos = (*tri)->centroid;
+                Vector2 gPos = quads.front()->centroid;
 
                 ///////////////////////
                 // quick check for clear path to goal
@@ -1025,7 +887,7 @@ void idle()
 
                 for (h = hexagons.begin(); h != hexagons.end(); ++h)
                 {
-                    goalBlocked |= polygonInter(tPos.x, tPos.y,
+                    goalBlocked |= edge_polygon_intersection(tPos.x, tPos.y,
                             gPos.x, gPos.y,
                             (*h)->pts, (*h)->numPoints);
                 }
@@ -1053,8 +915,7 @@ void idle()
 
                     for (h = hexagons.begin(); h != hexagons.end(); ++h)
                     {
-                        intersect1 = polygonInter(tPos.x, tPos.y,
-                                randPoints[i].x, randPoints[i].y,
+                        intersect1 = edge_polygon_intersection(tPos, randPoints[i],
                                 (*h)->pts, (*h)->numPoints);
 
                         if (intersect1)
@@ -1062,8 +923,7 @@ void idle()
                             break;
                         }
 
-                        intersect2 = polygonInter(gPos.x, gPos.y,
-                                randPoints[i].x, randPoints[i].y,
+                        intersect2 = edge_polygon_intersection(gPos, randPoints[i],
                                 (*h)->pts, (*h)->numPoints);
 
                         if (intersect2)
@@ -1077,8 +937,8 @@ void idle()
                         continue;
                     }
 
-                    float tempT = tPos.dist(randPoints[i]);
-                    float tempG = gPos.dist(randPoints[i]);
+                    float tempT = distance(tPos, randPoints[i]);
+                    float tempG = distance(gPos, randPoints[i]);
 
                     if (tempT < tDist)
                     {
@@ -1107,7 +967,7 @@ void idle()
 
         for (tri = triangles.begin(); tri != triangles.end(); ++tri)
         {
-            Point2D q = quads.front()->centroid;
+            Vector2 q = quads.front()->centroid;
             (*tri)->path.push_back(q);
         }
 
@@ -1116,9 +976,9 @@ void idle()
 }
 
 // convert mouse coordinate in pixel into the window coordinate system
-Point2D mouseToPoint(int x, int y)
+Vector2 mouseToPoint(int x, int y)
 {
-    return Point2D(float(x) / windowWidth, 1.0 - float(y) / windowHeight);
+    return Vector2(float(x) / windowWidth, 1.0 - float(y) / windowHeight);
 }
 
 // called on mouse button events
