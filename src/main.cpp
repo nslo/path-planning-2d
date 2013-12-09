@@ -6,6 +6,8 @@
 #include <list>
 #include "vector.hpp"
 
+#define UNUSED(expr) do { (void)(expr); } while (0)
+
 const float EPSILON = 0.01;
 const float DELTA = 0.0002;
 const int PRM_POINTS = 100;
@@ -1235,7 +1237,7 @@ void keyboard(unsigned char key, int x, int y)
         break;
     }
 
-    x = y; y = x; // suppress compiler warnings (x and y are mouse coords at time of keypress)
+    UNUSED(x); UNUSED(y);
 
     glutPostRedisplay(); // tell GLUT to call display()
 }

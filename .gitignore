@@ -16,7 +16,7 @@
 *.swp
 
 # executable
-path
+main
 
 # binaries
 bin

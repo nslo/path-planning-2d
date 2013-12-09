@@ -7,14 +7,13 @@ CXX = clang++
 CXXFLAGS = -Wall -Wextra -Werror -pedantic -std=c++11 -I"./include" -I"./$(SRC_DIR)" -I"./$(TOP_OBJ_DIR)"
 LDLIBS = -lglut -lGLU -lGL 
 #LDLIBS += -lXmu -lX11 -lXi
-#LDLIBS += -lboost_thread -lboost_system
 #ISPC = ispc
 #ISPCFLAGS = -O2 --target=avx-x2 --arch=x86-64
 
 # src and executable
 SRC_DIR = src
 #SRCS = $(wildcard **/*.cpp)
-TARGET = path
+TARGET = main
 # .o files
 TOP_OBJ_DIR = bin
 OBJ_DIR = $(TOP_OBJ_DIR)/$(SUB_OBJ_DIR)
