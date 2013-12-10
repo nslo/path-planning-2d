@@ -7,7 +7,7 @@ SRCS = \
 	geometry/polygon.cpp \
 	geometry/triangle.cpp \
 	math/vector.cpp \
-	map/djikstra.cpp \
+	map/dijkstra.cpp \
 	map/map.cpp \
 	map/prm.cpp \
 

@@ -3,6 +3,41 @@
 namespace nslo
 {
 
+void get_new_robot(Vector2& center, double& radius)    
+{
+    Vector2 default_robot_center = Vector2(0.50, 0.05);
+    double default_robot_radius = 0.05;
+    center = default_robot_center;
+    radius = default_robot_radius;
+}
+
+
+void get_new_obstacle(std::vector<Vector2>& obstacle_pts)
+{
+    std::vector<Vector2> default_obstacle = 
+    {
+        Vector2(0.40, 0.10),
+        Vector2(0.20, 0.20),
+        Vector2(0.30, 0.20),
+        Vector2(0.50, 0.30),
+        Vector2(0.60, 0.30),
+        Vector2(0.55, 0.12)
+    };
+    obstacle_pts = default_obstacle;
+}
+
+void get_new_goal(std::vector<Vector2>& goal_pts)
+{
+    std::vector<Vector2> default_goal = 
+    {
+        Vector2(0.50, 0.90),
+        Vector2(0.52, 0.90),
+        Vector2(0.52, 0.88),
+        Vector2(0.50, 0.88),
+    };
+    goal_pts = default_goal;
+}
+
 Robot::Robot(const Vector2& _center, const double& _radius) 
     : body(_center, _radius)
 {

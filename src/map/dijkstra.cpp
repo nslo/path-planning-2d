@@ -1,13 +1,13 @@
-#include "djikstra.hpp"
+#include "dijkstra.hpp"
+
+const double infinity = std::numeric_limits<double>::max();
 
 namespace nslo
 {
 
-void clear_paths()
+void clear_paths(std::vector<Robot *> robots)
 {
-    robot_list::iterator r_iter;
-
-    for (r_iter = robots.begin(); r_iter != robots.end(); ++r_iter)
+    for (auto r_iter = robots.begin(); r_iter != robots.end(); ++r_iter)
     {
         (*r_iter)->path.clear();
         (*r_iter)->orientation.x = 0.0;
@@ -15,42 +15,44 @@ void clear_paths()
     }
 }
 
-void print_path(int source, int node, int* predecessor, Robot* robot)
+void print_path(int source, int node, int* predecessor, Robot* robot,
+        std::vector<Vector2> rand_points, bool& replan, std::vector<Robot *> robots)
 {
     if (node == source)
     {
-        robot->path.push_back(randPoints[source]);
+        robot->path.push_back(rand_points[source]);
         std::cout << (char)(node + 97) << "..";
     }
     else if (predecessor[node] == -1)
     {
         std::cout << "No path from “<<source<<” to "<< (char)(node + 97) << std::endl;
-        clear_paths();
+        clear_paths(robots);
         return;
     }
     else
     {
-        print_path(source, predecessor[node], predecessor, robot);
-        robot->path.push_back(randPoints[node]);
+        print_path(source, predecessor[node], predecessor, robot, rand_points, replan, robots);
+        robot->path.push_back(rand_points[node]);
         std::cout << (char) (node + 97) << "..";
     }
 
     replan = false;
 }
 
-void dijkstra(int source, int goal, Robot* robot)
+void dijkstra(int source, int goal, Robot* robot, size_t num_vertices,
+       std::vector<Vector2> rand_points, bool& replan, std::vector<Robot *> robots)
 {
     // initialize; the distance between source to source is zero and all other
     // distances between source and vertices are infinity. The mark is initialized
     // to false and predecessor is initialized to -1
-    int predecessor[PRM_POINTS];
-    double distance[PRM_POINTS];
-    bool mark[PRM_POINTS]; //keep track of visited node
+    std::vector<int> predecessor;
+    std::vector<double> distance;
+    std::vector<bool> mark; //keep track of visited node
     //double minDistance = infinity;
     int closestUnmarkedNode;
-    int count = 0;
+    size_t count = 0;
 
-    for (int i = 0; i < PRM_POINTS; i++)
+    for (size_t i = 0; i < num_vertices; i++)
     {
         mark[i] = false;
         predecessor[i] = -1;
@@ -59,13 +61,13 @@ void dijkstra(int source, int goal, Robot* robot)
 
     distance[source] = 0;
 
-    while (count < PRM_POINTS)
+    while (count < num_vertices)
     {
         // return the node which is nearest from the Predecessor marked node.
         // If the node is already marked as visited, then it search for another
         int minDistance = infinity;
 
-        for (int i = 0; i < PRM_POINTS; i++)
+        for (size_t i = 0; i < num_vertices; i++)
         {
             if((!mark[i]) && (minDistance >= distance[i]))
             {
@@ -76,7 +78,7 @@ void dijkstra(int source, int goal, Robot* robot)
 
         mark[closestUnmarkedNode] = true;
 
-        for (int i = 0; i < PRM_POINTS; i++)
+        for (size_t i = 0; i < num_vertices; i++)
         {
             if ((!mark[i]) && (adjacency[closestUnmarkedNode][i] > 0) )
             {
@@ -93,7 +95,8 @@ void dijkstra(int source, int goal, Robot* robot)
         count++;
     }
 
-    print_path(source, goal, predecessor, robot);
+    print_path(source, goal, predecessor, robot, rand_points, replan, robots);
+
     std::cout << "->" << distance[goal] << std::endl;
 }
 

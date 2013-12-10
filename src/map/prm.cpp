@@ -1,35 +1,28 @@
+#include <vector>
 #include "prm.hpp"
-
-const int PRM_POINTS = 100;
-const int K = 4;
-const double infinity = std::numeric_limits<double>::max();
-Vector2 randPoints[PRM_POINTS]; 
-double adjacency[PRM_POINTS][PRM_POINTS];
 
 namespace nslo
 {
 
-void prm()
+void prm(std::vector<Robot *> robots,
+        std::vector<Obstacle *> obstacles,
+        std::vector<Goal *> goals, std::vector<Vector2> rand_points)
 {
     // generate 100 random points from (0.0, 0.0) to (1.0, 1.0)
-    int iter = 0;
-    
+    size_t iter = 0;
     while (iter < PRM_POINTS)
     {
         bool valid = true;
         double x = (double) rand() / (RAND_MAX);
         double y = (double) rand() / (RAND_MAX);
         Vector2 tempPoint = Vector2(x, y);
-        robot_list::iterator i;
-        obstacle_list::iterator j;
-        goal_list::iterator k;
 
         // disqualify points that:
         // a) are inside polygons
         // b) TODO are _radius_ distance from any line segment in any polygon
         // c) TODO are _radius_ distance from any vertex of any polygon
 
-        for (j = obstacles.begin(); j != obstacles.end(); ++j)
+        for (auto j = obstacles.begin(); j != obstacles.end(); ++j)
         {
             if ((*j)->body.point_in_polygon(tempPoint))
             {
@@ -43,7 +36,7 @@ void prm()
             break;
         }
 
-        for (k = goals.begin(); k != goals.end(); ++k)
+        for (auto k = goals.begin(); k != goals.end(); ++k)
         {
             if ((*k)->body.point_in_polygon(tempPoint))
             {
@@ -57,7 +50,7 @@ void prm()
             break;
         }
 
-        for (i = robots.begin(); i != robots.end(); ++i)
+        for (auto i = robots.begin(); i != robots.end(); ++i)
         {
             if ((*i)->body.point_in_polygon(tempPoint))
             {
@@ -71,7 +64,7 @@ void prm()
             break;
         }
 
-        randPoints[iter] = tempPoint;
+        rand_points.push_back(tempPoint);
         iter++;
     }
 
@@ -83,31 +76,27 @@ void prm()
     // TODO KNN (nlogn)
 
     // reset adjacency matrix
-    for (int i = 0; i < PRM_POINTS; i++)
+    for (size_t i = 0; i < PRM_POINTS; i++)
     {
-        for (int j = 0; j < PRM_POINTS; j++)
+        for (size_t j = 0; j < PRM_POINTS; j++)
         {
             adjacency[i][j] = infinity;
         }
     }
 
-    for (int iter1 = 0; iter1 < PRM_POINTS; iter1++)
+    for (size_t iter1 = 0; iter1 < PRM_POINTS; iter1++)
     {
         //int nearest[K];
 
         bool valid = true;
 
         //for (int iter2 = iter1 + 1; iter2 < PRM_POINTS; iter2++)
-        for (int iter2 = iter1 + 1; iter2 < PRM_POINTS; iter2++)
+        for (size_t iter2 = iter1 + 1; iter2 < PRM_POINTS; iter2++)
         {
-            robot_list::iterator i;
-            obstacle_list::iterator j;
-            goal_list::iterator k;
-
-            for (j = obstacles.begin(); j != obstacles.end(); ++j)
+            for (auto j = obstacles.begin(); j != obstacles.end(); ++j)
             {
-                bool intersect = (*j)->body.edge_polygon_intersect(randPoints[iter1],
-                        randPoints[iter2]);
+                bool intersect = (*j)->body.edge_polygon_intersect(rand_points[iter1],
+                        rand_points[iter2]);
 
                 if (intersect)
                 {
@@ -123,10 +112,10 @@ void prm()
                 break;
             }
 
-            for (k = goals.begin(); k != goals.end(); ++k)
+            for (auto k = goals.begin(); k != goals.end(); ++k)
             {
-                bool intersect = (*k)->body.edge_polygon_intersect(randPoints[iter1], 
-                        randPoints[iter2]);
+                bool intersect = (*k)->body.edge_polygon_intersect(rand_points[iter1], 
+                        rand_points[iter2]);
 
                 if (intersect)
                 {
@@ -141,10 +130,10 @@ void prm()
                 break;
             }
 
-            for (i = robots.begin(); i != robots.end(); ++i)
+            for (auto i = robots.begin(); i != robots.end(); ++i)
             {
-                bool intersect = (*i)->body.edge_polygon_intersect(randPoints[iter1],
-                        randPoints[iter2]);
+                bool intersect = (*i)->body.edge_polygon_intersect(rand_points[iter1],
+                        rand_points[iter2]);
 
                 if (intersect)
                 {
@@ -159,7 +148,7 @@ void prm()
                 break;
             }
 
-            double edgeDist = distance(randPoints[iter1], randPoints[iter2]);
+            double edgeDist = distance(rand_points[iter1], rand_points[iter2]);
             adjacency[iter1][iter2] = edgeDist;
             adjacency[iter2][iter1] = edgeDist;
         }

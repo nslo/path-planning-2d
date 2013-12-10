@@ -18,7 +18,7 @@ char ComputeDirection(double xi, double yi, double xj, double yj,
 bool edge_edge_intersect(double x1, double y1, double x2, double y2,
         double x3, double y3, double x4, double y4);
  
-class Geometry : public Drawable
+class Geometry : public Moveable
 {
 public: 
     // Constructor and Destructor

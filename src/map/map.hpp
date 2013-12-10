@@ -8,7 +8,11 @@
 namespace nslo
 {
 
-class Robot : public Drawable
+void get_new_robot(Vector2& center, double& radius);    
+void get_new_obstacle(std::vector<Vector2>& obstacle_pts);
+void get_new_goal(std::vector<Vector2>& goal_pts);
+
+class Robot : public Moveable
 {
 public:
     // Constructor and destructor
@@ -28,7 +32,7 @@ public:
     virtual void move(double dx, double dy);
 };
 
-class Obstacle : public Drawable 
+class Obstacle : public Moveable 
 {
 public:
     // Constructor and destructor
@@ -45,7 +49,7 @@ public:
     virtual void move(double dx, double dy);
 };
 
-class Goal : public Drawable
+class Goal : public Moveable
 {
 public:
     // Constructor and destructor
