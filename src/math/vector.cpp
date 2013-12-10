@@ -7,7 +7,8 @@
 
 #include "vector.hpp"
 
-namespace nslo {
+namespace nslo
+{
 
 const Vector2 Vector2::Zero = Vector2( 0, 0 );
 const Vector2 Vector2::Ones = Vector2( 1, 1 );

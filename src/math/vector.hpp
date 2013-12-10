@@ -12,7 +12,8 @@
 #include <cmath>
 #include <iostream>
 
-namespace nslo {
+namespace nslo
+{
 
 /*
 This file defines 3 different vector classes: 2D, 3D, and 4D.

@@ -1,7 +1,15 @@
 SRCS = \
 	main.cpp \
-	vector.cpp \
-	geometry.cpp \
+	draw/draw.cpp \
+	draw/drawable.cpp \
+	geometry/circle.cpp \
+	geometry/geometry.cpp \
+	geometry/polygon.cpp \
+	geometry/triangle.cpp \
+	math/vector.cpp \
+	map/djikstra.cpp \
+	map/map.cpp \
+	map/prm.cpp \
 
 # compiler flags
 CXX = clang++
