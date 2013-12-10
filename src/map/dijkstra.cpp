@@ -46,7 +46,6 @@ void dijkstra(int source, int goal, Robot* robot, size_t num_vertices,
     std::vector<int> predecessor;
     std::vector<double> distance;
     std::vector<bool> mark; //keep track of visited node
-    //double minDistance = infinity;
     int closestUnmarkedNode;
     size_t count = 0;
 
@@ -57,13 +56,18 @@ void dijkstra(int source, int goal, Robot* robot, size_t num_vertices,
         distance.push_back(infinity);
     }
 
+    std::cout << num_vertices << std::endl;
+    assert(predecessor.size() == num_vertices);
+    assert(distance.size() == num_vertices);
+    assert(mark.size() == num_vertices);
+
     distance[source] = 0;
 
     while (count < num_vertices)
     {
         // return the node which is nearest from the Predecessor marked node.
         // If the node is already marked as visited, then it search for another
-        int minDistance = infinity;
+        double minDistance = infinity;
 
         for (size_t i = 0; i < num_vertices; i++)
         {
