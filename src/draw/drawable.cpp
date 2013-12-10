@@ -7,4 +7,8 @@ Drawable::Drawable() {}
 
 Drawable::~Drawable() {}
 
+Moveable::Moveable() {}
+
+Moveable::~Moveable() {}
+
 }

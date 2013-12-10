@@ -13,6 +13,7 @@ namespace nslo
 // Some things can be drawn, some things can be drawn and moved
 class Drawable
 {
+public:
     // Constructor and destructor
     Drawable();
     virtual ~Drawable();

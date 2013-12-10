@@ -1,7 +1,5 @@
 #include "dijkstra.hpp"
 
-const double infinity = std::numeric_limits<double>::max();
-
 namespace nslo
 {
 
@@ -15,7 +13,7 @@ void clear_paths(std::vector<Robot *> robots)
     }
 }
 
-void print_path(int source, int node, int* predecessor, Robot* robot,
+void print_path(int source, int node, std::vector<int> predecessor, Robot* robot,
         std::vector<Vector2> rand_points, bool& replan, std::vector<Robot *> robots)
 {
     if (node == source)
@@ -54,9 +52,9 @@ void dijkstra(int source, int goal, Robot* robot, size_t num_vertices,
 
     for (size_t i = 0; i < num_vertices; i++)
     {
-        mark[i] = false;
-        predecessor[i] = -1;
-        distance[i] = infinity;
+        mark.push_back(false);
+        predecessor.push_back(-1);
+        distance.push_back(infinity);
     }
 
     distance[source] = 0;

@@ -2,23 +2,27 @@
 
 #include "../math/vector.hpp"
 #include "../map/map.hpp"
+#include "../map/dijkstra.hpp"
 
 namespace nslo
 {
 
 // global variables
-std::vector<Robot *> robots; // the list of our robots
-Robot *active_robot = nullptr; // the active triangle while dragging
-std::vector<Obstacle *> obstacles; // the list of our obstacles
-Obstacle *active_obstacle = nullptr; // the active hexagon while dragging
-std::vector<Goal *> goals; // the list of our obstacles
-Goal *active_goal = nullptr; // the active hexagon while dragging
-std::vector<Vector2> rand_points;
-bool paused;
-bool replan;
-int windowWidth, windowHeight; // dimensions of the window in pixel
-const double DELTA = 0.0002;
-const bool SHOW_POINTS = true;
+extern std::vector<Robot *> robots; // the list of our robots
+extern Robot *active_robot; // the active triangle while dragging
+extern std::vector<Obstacle *> obstacles; // the list of our obstacles
+extern Obstacle *active_obstacle; // the active hexagon while dragging
+extern std::vector<Goal *> goals; // the list of our obstacles
+extern Goal *active_goal; // the active hexagon while dragging
+extern std::vector<Vector2> rand_points;
+extern bool paused;
+extern bool replan;
+extern int windowWidth, windowHeight; // dimensions of the window in pixel
+
+extern bool SHOW_POINTS;
+extern size_t PRM_POINTS;
+extern double infinity;
+extern std::vector<std::vector<double>> adjacency;
 
 // called on window refresh events via glut
 void display();

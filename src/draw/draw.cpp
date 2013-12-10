@@ -1,7 +1,4 @@
 #include "draw.hpp"
-#include "../map/map.hpp"
-#include "../map/prm.hpp"
-#include "../map/dijkstra.hpp"
 #include <vector>
 
 #define UNUSED(expr) do { (void)(expr); } while (0)

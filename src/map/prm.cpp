@@ -1,5 +1,6 @@
 #include <vector>
 #include "prm.hpp"
+#include "../draw/draw.hpp"
 
 namespace nslo
 {

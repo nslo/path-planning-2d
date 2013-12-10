@@ -1,41 +1,67 @@
 #include <iostream>
 #include <vector>
-#include "draw/draw.hpp"
 #include "draw/drawable.hpp"
+#include "draw/draw.hpp"
+#include "map/map.hpp"
 #include "map/prm.hpp"
-#include "map/dijkstra.hpp"
 
 #define UNUSED(expr) do { (void)(expr); } while (0)
 
 using namespace nslo;
 
-void init(std::vector<Robot *> robots,
-        std::vector<Obstacle *> obstacles,
-        std::vector<Goal *> goals, std::vector<Vector2> rand_points);
+//void init(std::vector<Robot *>& robots,
+//        std::vector<Obstacle *>& obstacles,
+//        std::vector<Goal *>& goals, std::vector<Vector2>& rand_points);
+void init();
 void reset();
 void step();
 void idle();
 
+namespace nslo 
+{
+
+// Global variables
+std::vector<Robot *> robots; // the list of our robots
+std::vector<Obstacle *> obstacles; // the list of our obstacles
+std::vector<Goal *> goals; // the list of our obstacles
+Robot *active_robot = nullptr; // the active triangle while dragging
+Obstacle *active_obstacle = nullptr; // the active hexagon while dragging
+Goal *active_goal = nullptr; // the active hexagon while dragging
+bool SHOW_POINTS = true;
+size_t PRM_POINTS = 100;
+double infinity = std::numeric_limits<double>::max();
+std::vector<Vector2> rand_points;
+bool paused;
+bool replan = true;
+int windowWidth, windowHeight; // dimensions of the window in pixel
+std::vector<std::vector<double>> adjacency;
+
+}
+
 int main(int argc, char *argv[])
 {
+
+    // Glut stuff
     glutInit(&argc, argv); // init GLUT library
     glutInitDisplayMode(GLUT_SINGLE|GLUT_RGB); // true color and single buffer
     glutInitWindowSize(1600, 1024); // set initial window size
     glutCreateWindow("Float"); // open window with a title
 
-    init(robots, obstacles, goals, rand_points);
+    // Initialize objects
+    init();
+    //init(robots, obstacles, goals, rand_points);
 
-    // register callback functions for redraw, mouse events etc.
+    // Register callback functions for redraw, mouse events etc.
     glutDisplayFunc(display);
     glutMouseFunc(mouse_func);
     glutMotionFunc(drag);
     glutReshapeFunc(reshape);
     glutKeyboardFunc(keyboard_func);
 
-    // animation and stuff goes here
+    // Animation and stuff goes here
     glutIdleFunc(idle);
 
-    // create right button popup menu
+    // Create right button popup menu
     glutCreateMenu(menu_func);
     glutAddMenuEntry("New Robot", 1);
     glutAddMenuEntry("New Obstacle", 2);
@@ -43,14 +69,16 @@ int main(int argc, char *argv[])
     glutAddMenuEntry("Quit", 4);
     glutAttachMenu(GLUT_RIGHT_BUTTON);
 
-    glutMainLoop(); // enter main loop
+    // Enter main loop
+    glutMainLoop();
 
     return 0;
 }
 
-void init(std::vector<Robot *> robots,
-        std::vector<Obstacle *> obstacles,
-        std::vector<Goal *> goals, std::vector<Vector2> rand_points)
+//void init(std::vector<Robot *>& robots,
+//        std::vector<Obstacle *>& obstacles,
+//        std::vector<Goal *>& goals, std::vector<Vector2>& rand_points)
+void init()
 {
     paused = true;
     replan = true;
@@ -73,9 +101,11 @@ void init(std::vector<Robot *> robots,
 
     for (size_t i = 0; i < PRM_POINTS; i++)
     {
+        std::vector<double> row;
+        adjacency.push_back(row);
         for (size_t j = 0; j < PRM_POINTS; j++)
         {
-            adjacency[i][j] = infinity;
+            adjacency[i].push_back(infinity);
         }
     }
 
@@ -90,7 +120,8 @@ void reset()
     robots.clear();
     obstacles.clear();
     goals.clear();
-    init(robots, obstacles, goals, rand_points);
+    init();
+    //init(robots, obstacles, goals, rand_points);
 }
 
 void step()
@@ -161,6 +192,7 @@ void step()
             // otherwise, move toward next waypoint
             else
             {
+                double DELTA = 0.0002;
                 dx = DELTA * (*i)->orientation.x;
                 dy = DELTA * (*i)->orientation.y;
                 (*i)->move(dx, dy);
@@ -171,7 +203,7 @@ void step()
     glutPostRedisplay();
 }
 
-void idle(std::vector<Vector2> rand_points)
+void idle()
 {
     if (!paused)
     {
@@ -226,8 +258,8 @@ void idle(std::vector<Vector2> rand_points)
                 // check to see if closest nodes to start and goal are valid
                 int tClosest = -1;
                 int gClosest = -1;
-                double tDist= infinity;
-                double gDist= infinity;
+                double tDist = infinity;
+                double gDist = infinity;
 
                 for (size_t i = 0; i < PRM_POINTS; i++)
                 {
@@ -290,3 +322,4 @@ void idle(std::vector<Vector2> rand_points)
         step();
     }
 }
+
